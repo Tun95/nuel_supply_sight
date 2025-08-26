@@ -1,4 +1,3 @@
-// ChartComponent.tsx
 import {
   LineChart,
   Line,
@@ -54,14 +53,18 @@ function ChartComponent({ data }: ChartComponentProps) {
   };
 
   return (
-    <div className="w-full h-full p-4">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full h-full p-4 relative right-2">
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+        style={{ outline: "none" }}
+      >
         <LineChart
           data={data}
           margin={{
             top: 5,
-            right: 30,
-            left: 20,
+            right: 0,
+            left: -30,
             bottom: 5,
           }}
         >
@@ -86,18 +89,18 @@ function ChartComponent({ data }: ChartComponentProps) {
             type="monotone"
             dataKey="stock"
             stroke="#3b82f6"
-            strokeWidth={2}
-            dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
-            activeDot={{ r: 6, fill: "#3b82f6" }}
+            strokeWidth={1}
+            dot={{ fill: "#3b82f6", strokeWidth: 2, r: 2 }}
+            activeDot={{ r: 4, fill: "#3b82f6" }}
             name="Stock"
           />
           <Line
             type="monotone"
             dataKey="demand"
             stroke="#10b981"
-            strokeWidth={2}
-            dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
-            activeDot={{ r: 6, fill: "#10b981" }}
+            strokeWidth={1}
+            dot={{ fill: "#10b981", strokeWidth: 2, r: 2 }}
+            activeDot={{ r: 4, fill: "#10b981" }}
             name="Demand"
           />
         </LineChart>

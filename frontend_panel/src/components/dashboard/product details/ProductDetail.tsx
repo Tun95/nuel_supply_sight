@@ -45,7 +45,7 @@ function ProductDetailSidebar({ product, onClose }: ProductDetailSidebarProps) {
     <div
       className={`w-96 h-full shadow-xl w-full max-w-[480px] transition-transform duration-200 ease-in-out ${
         theme === "dark" ? "bg-gray-900" : "bg-white"
-      }`}
+      } max-480px:w-full`}
     >
       <div className=" h-full flex flex-col">
         {/* Header */}
@@ -152,11 +152,9 @@ function ProductDetailSidebar({ product, onClose }: ProductDetailSidebarProps) {
                 <div className="grid grid-cols-2 gap-2">
                   <select className="h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
                     <option>Select source warehouse</option>
-                    {/* Warehouse options would go here */}
                   </select>
                   <select className="h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
                     <option>Select destination warehouse</option>
-                    {/* Warehouse options would go here */}
                   </select>
                 </div>
                 <div className="flex space-x-2">

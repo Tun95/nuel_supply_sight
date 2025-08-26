@@ -27,7 +27,7 @@ function Dashboard() {
   const [searchFilter, setSearchFilter] = useState("");
   const [warehouseFilter, setWarehouseFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1); // Add this state
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filter products based on filters
   const filteredProducts = useMemo(() => {
@@ -89,12 +89,6 @@ function Dashboard() {
           selectedDateRange
         );
 
-        // Debug logging
-        console.log("Selected date range:", selectedDateRange);
-        console.log("Original data length:", mockKpiData.length);
-        console.log("Filtered data length:", filteredData.length);
-        console.log("Filtered data:", filteredData);
-
         setKpiChartData(filteredData);
 
         setLoading(false);
@@ -110,7 +104,7 @@ function Dashboard() {
   // Function to filter KPI data based on date range
   const filterKpiDataByRange = (data: KPI[], range: string): KPI[] => {
     const today = new Date();
-    today.setHours(23, 59, 59, 999); // Set to end of day
+    today.setHours(23, 59, 59, 999);
 
     const startDate = new Date();
 
@@ -128,11 +122,11 @@ function Dashboard() {
         startDate.setDate(today.getDate() - 7);
     }
 
-    startDate.setHours(0, 0, 0, 0); // Set to start of day
+    startDate.setHours(0, 0, 0, 0);
 
     return data.filter((kpi) => {
       const kpiDate = new Date(kpi.date);
-      kpiDate.setHours(12, 0, 0, 0); // Normalize time for comparison
+      kpiDate.setHours(12, 0, 0, 0);
       return kpiDate >= startDate && kpiDate <= today;
     });
   };
@@ -151,11 +145,11 @@ function Dashboard() {
       >
         {/* Welcome message */}
         <div className="mb-2 max-480px:mb-1">
-          <div className="content">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 max-480px:text-xl max-480px:p-2">
+          <div className="content max-900px:px-2 max-480px:p-2 max-480px:pb-0">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 max-480px:text-xl ">
               Welcome back Tunji!
             </h2>
-            <p className="max-900px:px-2 text-gray-600 dark:text-gray-400 mt-2 max-w-3xl text-sm leading-6">
+            <p className="text-gray-600 dark:text-gray-400 mt-2 max-w-3xl text-sm leading-6">
               Track inventory levels, demand patterns, and fulfillment metrics
               in one place.
             </p>

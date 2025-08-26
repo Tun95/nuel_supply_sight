@@ -7,7 +7,7 @@ function ErrorBoundary() {
   return (
     <>
       <Helmet>
-        <title>Page Not Found</title>
+        <title>Error 404</title>
       </Helmet>
       <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="max-w-4xl w-full p-5 text-gray-900 dark:text-gray-50">
