@@ -15,7 +15,7 @@ function Navbar() {
   const { selectedDateRange, setSelectedDateRange } = useDateRange();
   const profileRef = useRef<HTMLDivElement>(null);
 
-  // Handle click outside the notifications dropdown
+  // Handle click outside dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -32,7 +32,7 @@ function Navbar() {
 
   return (
     <>
-      <header className="header sticky top-0 h-16 flex items-center justify-between px-8 max-900px:px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-all z-20">
+      <header className="header sticky top-0 h-16 flex items-center justify-between px-8 max-900px:px-4 max-480px:px-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-all z-20">
         {/* Left section: Logo and date range chips */}
         <div className="flex items-center gap-6">
           {/* Logo */}
