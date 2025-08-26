@@ -60,7 +60,7 @@ export const calculateTotalDemand = (products: Product[]): number => {
 // Calculate Fill Rate
 export const calculateFillRate = (products: Product[]): number => {
   const totalDemand = calculateTotalDemand(products);
-  if (totalDemand === 0) return 100; // Avoid division by zero
+  if (totalDemand === 0) return 100;
 
   const fulfilledDemand = products.reduce((total, product) => {
     return total + Math.min(product.stock, product.demand);
