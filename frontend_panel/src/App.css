@@ -79,6 +79,20 @@ html {
   background-color: var(--color-dark-hover) !important;
 }
 
+/* Dark mode styles for empty table state */
+.dark-table .ant-table-placeholder {
+  background-color: var(--color-dark-bg) !important;
+  border-color: var(--color-dark-border) !important;
+}
+
+.dark-table .ant-table-placeholder .ant-empty-description {
+  color: var(--color-dark-text-secondary) !important;
+}
+
+.dark-table .ant-table-placeholder:hover > td {
+  background-color: var(--color-dark-hover) !important;
+}
+
 .pagination-custom .ant-pagination-item {
   border-radius: 6px;
   margin: 0 4px;

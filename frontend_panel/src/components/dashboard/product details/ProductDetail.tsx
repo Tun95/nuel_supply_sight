@@ -43,7 +43,7 @@ function ProductDetailSidebar({ product, onClose }: ProductDetailSidebarProps) {
 
   return (
     <div
-      className={`w-96 h-full shadow-xl w-full max-w-[480px] transition-transform duration-200 ease-in-out ${
+      className={`max-900px:h-[100vh] w-96 h-full shadow-xl w-full max-w-[480px] transition-transform duration-200 ease-in-out ${
         theme === "dark" ? "bg-gray-900" : "bg-white"
       } max-480px:w-full`}
     >

@@ -1,4 +1,3 @@
-// DesktopTableView.tsx
 import { Table, Tag } from "antd";
 import { Product } from "../../../../types/data/datatype";
 
