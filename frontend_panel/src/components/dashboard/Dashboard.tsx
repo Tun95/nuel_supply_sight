@@ -12,6 +12,7 @@ import {
 } from "../../utilities/utils/Utils";
 import { KPI, Product } from "../../types/data/datatype";
 import FilterBox from "./filters/FilterBox";
+import { Loader } from "lucide-react";
 
 function Dashboard() {
   const { theme } = useTheme();
@@ -134,7 +135,10 @@ function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+        <div className="text-gray-600 dark:text-gray-400 flex justify-center items-center">
+          <Loader className="animate-spin text-gray-500 dark:text-gray-400" />{" "}
+          Loading...
+        </div>
       </div>
     );
   }
