@@ -84,11 +84,17 @@ function Dashboard() {
         });
 
         // Simulate fetching KPI data based on date range
-        // In a real app, this would be a GraphQL query: kpis(range: selectedDateRange)
         const filteredData = filterKpiDataByRange(
           mockKpiData,
           selectedDateRange
         );
+
+        // Debug logging
+        console.log("Selected date range:", selectedDateRange);
+        console.log("Original data length:", mockKpiData.length);
+        console.log("Filtered data length:", filteredData.length);
+        console.log("Filtered data:", filteredData);
+
         setKpiChartData(filteredData);
 
         setLoading(false);
@@ -104,6 +110,8 @@ function Dashboard() {
   // Function to filter KPI data based on date range
   const filterKpiDataByRange = (data: KPI[], range: string): KPI[] => {
     const today = new Date();
+    today.setHours(23, 59, 59, 999); // Set to end of day
+
     const startDate = new Date();
 
     switch (range) {
@@ -120,8 +128,11 @@ function Dashboard() {
         startDate.setDate(today.getDate() - 7);
     }
 
+    startDate.setHours(0, 0, 0, 0); // Set to start of day
+
     return data.filter((kpi) => {
       const kpiDate = new Date(kpi.date);
+      kpiDate.setHours(12, 0, 0, 0); // Normalize time for comparison
       return kpiDate >= startDate && kpiDate <= today;
     });
   };

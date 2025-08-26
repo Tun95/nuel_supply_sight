@@ -1,4 +1,5 @@
 import { KPI, Product, Warehouse } from "../types/data/datatype";
+import { generateRecentKpiData } from "../utilities/utils/Utils";
 
 export const widgetData = {
   deliverables: {
@@ -204,35 +205,4 @@ export const mockWarehouses: Warehouse[] = [
   { code: "DEL-B", name: "Delhi B", city: "Delhi", country: "India" },
 ];
 
-export const mockKpiData: KPI[] = [
-  { date: "2024-01-01", stock: 12000, demand: 9500 },
-  { date: "2024-01-02", stock: 11800, demand: 9800 },
-  { date: "2024-01-03", stock: 11500, demand: 10200 },
-  { date: "2024-01-04", stock: 11200, demand: 10500 },
-  { date: "2024-01-05", stock: 11000, demand: 10700 },
-  { date: "2024-01-06", stock: 10800, demand: 11000 },
-  { date: "2024-01-07", stock: 10500, demand: 11200 },
-  { date: "2024-01-08", stock: 12500, demand: 9800 },
-  { date: "2024-01-09", stock: 12300, demand: 9600 },
-  { date: "2024-01-10", stock: 12000, demand: 9400 },
-  { date: "2024-01-11", stock: 11800, demand: 9200 },
-  { date: "2024-01-12", stock: 11500, demand: 9000 },
-  { date: "2024-01-13", stock: 11200, demand: 8800 },
-  { date: "2024-01-14", stock: 11000, demand: 8600 },
-  { date: "2024-01-15", stock: 10800, demand: 8400 },
-  { date: "2024-01-16", stock: 10500, demand: 8200 },
-  { date: "2024-01-17", stock: 10200, demand: 8000 },
-  { date: "2024-01-18", stock: 10000, demand: 7800 },
-  { date: "2024-01-19", stock: 9800, demand: 7600 },
-  { date: "2024-01-20", stock: 9500, demand: 7400 },
-  { date: "2024-01-21", stock: 9200, demand: 7200 },
-  { date: "2024-01-22", stock: 9000, demand: 7000 },
-  { date: "2024-01-23", stock: 8800, demand: 6800 },
-  { date: "2024-01-24", stock: 8500, demand: 6600 },
-  { date: "2024-01-25", stock: 8200, demand: 6400 },
-  { date: "2024-01-26", stock: 8000, demand: 6200 },
-  { date: "2024-01-27", stock: 7800, demand: 6000 },
-  { date: "2024-01-28", stock: 7500, demand: 5800 },
-  { date: "2024-01-29", stock: 7200, demand: 5600 },
-  { date: "2024-01-30", stock: 7000, demand: 5400 },
-];
+export const mockKpiData: KPI[] = generateRecentKpiData(30);

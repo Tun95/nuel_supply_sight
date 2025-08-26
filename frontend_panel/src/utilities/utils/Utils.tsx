@@ -1,4 +1,4 @@
-import { Product } from "../../types/data/datatype";
+import { KPI, Product } from "../../types/data/datatype";
 
 // Format numbers with commas (e.g., 2,300,454)
 export const formatNumberWithCommas = (num: number): string => {
@@ -67,4 +67,22 @@ export const calculateFillRate = (products: Product[]): number => {
   }, 0);
 
   return (fulfilledDemand / totalDemand) * 100;
+};
+
+// GENERATE RECENT KPI DATA FOR THE PAST 'n' DAYS
+export const generateRecentKpiData = (days: number = 30): KPI[] => {
+  const data: KPI[] = [];
+
+  for (let i = days; i >= 0; i--) {
+    const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    const dateStr = date.toISOString().split("T")[0];
+
+    // Generate some realistic-looking data
+    const stock = 10000 + Math.floor(Math.random() * 3000);
+    const demand = 8000 + Math.floor(Math.random() * 4000);
+
+    data.push({ date: dateStr, stock, demand });
+  }
+
+  return data;
 };
