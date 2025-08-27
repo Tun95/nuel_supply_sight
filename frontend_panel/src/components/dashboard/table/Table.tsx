@@ -1,5 +1,5 @@
 // TableComponent.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pagination } from "antd";
 import ProductDetailSidebar from "../product details/ProductDetail";
 import { useTheme } from "../../../custom hooks/Hooks";
@@ -12,6 +12,7 @@ interface TableComponentProps {
   currentPage: number;
   onPageChange: (page: number) => void;
   loading?: boolean;
+  onProductUpdate?: (product: Product) => void;
 }
 
 function TableComponent({
@@ -19,6 +20,7 @@ function TableComponent({
   currentPage,
   onPageChange,
   loading = false,
+  onProductUpdate,
 }: TableComponentProps) {
   const { theme } = useTheme();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -39,6 +41,16 @@ function TableComponent({
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  useEffect(() => {
+    if (selectedProduct && products) {
+      // Find the updated product
+      const updatedProduct = products.find((p) => p.id === selectedProduct.id);
+      if (updatedProduct) {
+        setSelectedProduct(updatedProduct);
+      }
+    }
+  }, [products, selectedProduct]);
 
   if (loading) {
     return (
@@ -113,6 +125,7 @@ function TableComponent({
             <ProductDetailSidebar
               product={selectedProduct}
               onClose={() => setSelectedProduct(null)}
+              onProductUpdate={onProductUpdate}
             />
           </div>
         </div>

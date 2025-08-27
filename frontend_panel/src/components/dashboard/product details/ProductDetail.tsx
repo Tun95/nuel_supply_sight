@@ -5,7 +5,11 @@ import { useTheme } from "../../../custom hooks/Hooks";
 import { getStatusInfo } from "../../../utilities/status/status";
 import { useState } from "react";
 import { useMutation } from "@apollo/client";
-import { UPDATE_DEMAND, TRANSFER_STOCK, GET_PRODUCTS } from "../../../graphql/queries";
+import {
+  UPDATE_DEMAND,
+  TRANSFER_STOCK,
+  GET_PRODUCTS,
+} from "../../../graphql/queries";
 import { useQuery } from "@apollo/client";
 import { GET_WAREHOUSES } from "../../../graphql/queries";
 import { WarehousesQueryData } from "../../../types/graphql/graphql";
@@ -13,9 +17,19 @@ import { WarehousesQueryData } from "../../../types/graphql/graphql";
 interface ProductDetailSidebarProps {
   product: Product;
   onClose: () => void;
+  onProductUpdate?: (updatedProduct: Product) => void;
 }
 
-function ProductDetailSidebar({ product, onClose }: ProductDetailSidebarProps) {
+// Create a type for the products query result
+interface ProductsQueryResult {
+  products: Product[];
+}
+
+function ProductDetailSidebar({
+  product,
+  onClose,
+  onProductUpdate,
+}: ProductDetailSidebarProps) {
   const { theme } = useTheme();
   const [newDemand, setNewDemand] = useState(product.demand.toString());
   const [transferQuantity, setTransferQuantity] = useState("");
@@ -24,9 +38,92 @@ function ProductDetailSidebar({ product, onClose }: ProductDetailSidebarProps) {
 
   const statusInfo = getStatusInfo(product.stock, product.demand);
 
-  // GraphQL Mutations
-  const [updateDemand] = useMutation(UPDATE_DEMAND);
-  const [transferStock] = useMutation(TRANSFER_STOCK);
+  // GraphQL Mutations with cache updates
+  const [updateDemand] = useMutation(UPDATE_DEMAND, {
+    update: (cache, { data }) => {
+      if (!data) return;
+
+      const updatedProduct = data.updateDemand;
+      const existingProducts = cache.readQuery<ProductsQueryResult>({
+        query: GET_PRODUCTS,
+      });
+
+      if (existingProducts) {
+        cache.writeQuery({
+          query: GET_PRODUCTS,
+          data: {
+            products: existingProducts.products.map((p) =>
+              p.id === updatedProduct.id
+                ? { ...p, demand: updatedProduct.demand }
+                : p
+            ),
+          },
+        });
+      }
+
+      if (onProductUpdate) {
+        onProductUpdate(updatedProduct);
+      }
+    },
+  });
+
+  const [transferStock] = useMutation(TRANSFER_STOCK, {
+    update: (cache, { data }) => {
+      if (!data) return;
+
+      const updatedProduct = data.transferStock;
+      const existingProducts = cache.readQuery<ProductsQueryResult>({
+        query: GET_PRODUCTS,
+      });
+
+      if (existingProducts) {
+        // Find if the destination product already exists
+        const destinationProductExists = existingProducts.products.some(
+          (p) =>
+            p.id === updatedProduct.id &&
+            p.warehouse === updatedProduct.warehouse
+        );
+
+        let updatedProducts;
+
+        if (destinationProductExists) {
+          // Update both source and destination products
+          updatedProducts = existingProducts.products.map((p) => {
+            if (p.id === updatedProduct.id && p.warehouse === sourceWarehouse) {
+              // This is the source product - reduce stock
+              return { ...p, stock: p.stock - parseInt(transferQuantity) };
+            } else if (
+              p.id === updatedProduct.id &&
+              p.warehouse === destinationWarehouse
+            ) {
+              // This is the destination product - increase stock
+              return { ...p, stock: p.stock + parseInt(transferQuantity) };
+            }
+            return p;
+          });
+        } else {
+          // Destination product doesn't exist yet - add it and update source
+          updatedProducts = [
+            ...existingProducts.products.map((p) =>
+              p.id === updatedProduct.id && p.warehouse === sourceWarehouse
+                ? { ...p, stock: p.stock - parseInt(transferQuantity) }
+                : p
+            ),
+            updatedProduct,
+          ];
+        }
+
+        cache.writeQuery({
+          query: GET_PRODUCTS,
+          data: { products: updatedProducts },
+        });
+      }
+
+      if (onProductUpdate) {
+        onProductUpdate(updatedProduct);
+      }
+    },
+  });
 
   // Get warehouses for dropdowns
   const { data: warehousesData } =
@@ -40,9 +137,7 @@ function ProductDetailSidebar({ product, onClose }: ProductDetailSidebarProps) {
           productId: product.id,
           newDemand: parseInt(newDemand),
         },
-        refetchQueries: [{ query: GET_PRODUCTS }],
       });
-      // Show success message (you could add a toast notification here)
       alert("Demand updated successfully!");
     } catch (error) {
       console.error("Error updating demand:", error);
@@ -56,6 +151,11 @@ function ProductDetailSidebar({ product, onClose }: ProductDetailSidebarProps) {
       return;
     }
 
+    if (sourceWarehouse === destinationWarehouse) {
+      alert("Source and destination warehouses cannot be the same");
+      return;
+    }
+
     try {
       await transferStock({
         variables: {
@@ -64,11 +164,8 @@ function ProductDetailSidebar({ product, onClose }: ProductDetailSidebarProps) {
           destinationWarehouse,
           quantity: parseInt(transferQuantity),
         },
-        refetchQueries: [{ query: GET_PRODUCTS }],
       });
-      // Show success message
       alert("Stock transferred successfully!");
-      // Reset form
       setTransferQuantity("");
       setSourceWarehouse("");
       setDestinationWarehouse("");

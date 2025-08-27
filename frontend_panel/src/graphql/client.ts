@@ -2,20 +2,17 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { SchemaLink } from "@apollo/client/link/schema";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { addMocksToSchema } from "@graphql-tools/mock";
 import { typeDefs } from "./schema";
-import { mocks } from "./mocks";
+import { mockResolvers } from "./mocks";
 
-// Create executable schema with mocks
-const schema = makeExecutableSchema({ typeDefs });
-const schemaWithMocks = addMocksToSchema({
-  schema,
-  mocks,
-  preserveResolvers: true,
+// Executable schema with our custom resolvers
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers: mockResolvers,
 });
 
-// Create Apollo Client with mocked schema
+// Apollo Client with the schema
 export const client = new ApolloClient({
-  link: new SchemaLink({ schema: schemaWithMocks }),
+  link: new SchemaLink({ schema }),
   cache: new InMemoryCache(),
 });
