@@ -14,6 +14,10 @@ export interface ProductGQL {
   demand: number;
 }
 
+export interface KpisArgs {
+  range?: string;
+}
+
 export interface KPIGQL {
   date: string;
   stock: number;

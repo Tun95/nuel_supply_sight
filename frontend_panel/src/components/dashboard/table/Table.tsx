@@ -51,15 +51,15 @@ function TableComponent({
     );
   }
 
-  if (products.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-600 dark:text-gray-400">
-          No products found
-        </div>
-      </div>
-    );
-  }
+  // if (products.length === 0) {
+  //   return (
+  //     <div className="flex items-center justify-center h-64">
+  //       <div className="text-gray-600 dark:text-gray-400">
+  //         No products found
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <>

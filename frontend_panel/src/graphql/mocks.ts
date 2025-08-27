@@ -1,3 +1,4 @@
+// src/graphql/mocks.ts
 import { mockProducts, mockWarehouses } from "../data/data";
 import { generateRecentKpiData } from "../utilities/utils/Utils";
 import { Product } from "../types/data/datatype";
@@ -6,19 +7,20 @@ export const mocks = {
   Query: {
     products: () => mockProducts,
     warehouses: () => mockWarehouses,
-    kpis: (_: unknown, { range }: { range: string }) => {
-      let days = 7; // default to 7 days
-      if (range === "14d") days = 14;
-      if (range === "30d") days = 30;
-
+    // Alternative fix for the kpis resolver
+    kpis: (_: unknown, args: { range: string }) => {
+      const range = args?.range || "7d";
+      console.log("Received range:", args?.range);
+      const days = parseInt(range.replace("d", ""), 10);
       return generateRecentKpiData(days);
     },
   },
   Mutation: {
     updateDemand: (
       _: unknown,
-      { productId, newDemand }: { productId: string; newDemand: number }
+      args: { productId: string; newDemand: number }
     ) => {
+      const { productId, newDemand } = args;
       const productIndex = mockProducts.findIndex((p) => p.id === productId);
       if (productIndex === -1) {
         throw new Error("Product not found");
@@ -29,18 +31,15 @@ export const mocks = {
     },
     transferStock: (
       _: unknown,
-      {
-        productId,
-        sourceWarehouse,
-        destinationWarehouse,
-        quantity,
-      }: {
+      args: {
         productId: string;
         sourceWarehouse: string;
         destinationWarehouse: string;
         quantity: number;
       }
     ) => {
+      const { productId, sourceWarehouse, destinationWarehouse, quantity } =
+        args;
       const productIndex = mockProducts.findIndex(
         (p) => p.id === productId && p.warehouse === sourceWarehouse
       );

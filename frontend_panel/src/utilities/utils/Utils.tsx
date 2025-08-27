@@ -70,19 +70,30 @@ export const calculateFillRate = (products: Product[]): number => {
 };
 
 // GENERATE RECENT KPI DATA FOR THE PAST 'n' DAYS
-export const generateRecentKpiData = (days: number = 30): KPI[] => {
+export const generateRecentKpiData = (days: number = 7): KPI[] => {
   const data: KPI[] = [];
+  const today = new Date();
+  
+  // Clear time part to avoid timezone issues
+  today.setHours(0, 0, 0, 0);
 
-  for (let i = days; i >= 0; i--) {
-    const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-    const dateStr = date.toISOString().split("T")[0];
+  // Generate data for the specified number of days
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    
+    const dateStr = date.toISOString().split('T')[0];
 
-    // Generate some realistic-looking data
-    const stock = 10000 + Math.floor(Math.random() * 3000);
-    const demand = 8000 + Math.floor(Math.random() * 4000);
+    // Generate data with some randomness and trend
+    const randomFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2
+    const trend = 1 + ((days - 1 - i) / days) * 0.3; // Increase over time
+    
+    const stock = Math.floor((9000 + Math.random() * 2000) * randomFactor * trend);
+    const demand = Math.floor((7000 + Math.random() * 3000) * randomFactor * trend);
 
     data.push({ date: dateStr, stock, demand });
   }
 
+  console.log(`Generated ${data.length} days of KPI data for ${days} day request`);
   return data;
 };

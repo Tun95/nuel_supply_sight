@@ -8,6 +8,7 @@ import {
   calculateFillRate,
   calculateTotalDemand,
   calculateTotalStock,
+  generateRecentKpiData,
 } from "../../utilities/utils/Utils";
 import { KPI, Product } from "../../types/data/datatype";
 import FilterBox from "./filters/FilterBox";
@@ -32,7 +33,6 @@ function Dashboard() {
   } = useQuery<ProductsQueryData>(GET_PRODUCTS);
   const {
     data: kpisData,
-    loading: kpisLoading,
     error: kpisError,
   } = useQuery<KPIsQueryData>(GET_KPIS, {
     variables: { range: selectedDateRange },
@@ -58,13 +58,6 @@ function Dashboard() {
       setProducts(productsData.products);
     }
   }, [productsData]);
-
-  // Update KPI chart data when data is fetched
-  useEffect(() => {
-    if (kpisData) {
-      setKpiChartData(kpisData.kpis);
-    }
-  }, [kpisData]);
 
   // Calculate KPIs when products change
   useEffect(() => {
@@ -116,8 +109,30 @@ function Dashboard() {
     setCurrentPage(1);
   }, [searchFilter, warehouseFilter, statusFilter]);
 
+  // In Dashboard.tsx
+  useEffect(() => {
+    if (kpisData) {
+      // If we got data from the server, use it
+      setKpiChartData(kpisData.kpis);
+    } else {
+      // Fallback: generate data client-side based on selectedDateRange
+      let days = 7;
+      if (selectedDateRange === "14d") days = 14;
+      if (selectedDateRange === "30d") days = 30;
+
+      const generatedData = generateRecentKpiData(days);
+      setKpiChartData(generatedData);
+      console.log("KPIDATA AFTER:", kpiChartData)
+    }
+  }, [kpisData, selectedDateRange]);
+
+  // Also log when the date range changes
+  useEffect(() => {
+    console.log("Date range changed to:", selectedDateRange);
+  }, [selectedDateRange]);
+
   // Combined loading state
-  const loading = productsLoading || kpisLoading;
+  const loading = productsLoading;
 
   // Handle errors
   if (productsError) {

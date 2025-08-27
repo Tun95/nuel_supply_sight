@@ -50,7 +50,10 @@ function Navbar() {
             {dateRanges.map((range) => (
               <button
                 key={range.id}
-                onClick={() => setSelectedDateRange(range.id)}
+                onClick={() => {
+                  console.log("Setting date range to:", range.id);
+                  setSelectedDateRange(range.id);
+                }}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   selectedDateRange === range.id
                     ? "bg-accent-500 text-white"
@@ -86,7 +89,10 @@ function Navbar() {
           <div className="max-900px:flex hidden items-center gap-1 mr-2">
             <select
               value={selectedDateRange}
-              onChange={(e) => setSelectedDateRange(e.target.value)}
+              onChange={(e) => {
+                console.log("Select changed to:", e.target.value);
+                setSelectedDateRange(e.target.value);
+              }}
               className="bg-gray-100 dark:bg-gray-700 outline-none text-gray-700 dark:text-gray-300 text-sm rounded-md px-2 py-1.5 border-none"
             >
               {dateRanges.map((range) => (

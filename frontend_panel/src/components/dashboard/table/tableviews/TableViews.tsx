@@ -74,6 +74,7 @@ export const DesktopTableView = ({
   return (
     <Table<Product>
       dataSource={data}
+      rowKey="id"
       className={`w-full ${theme === "dark" ? "dark-table" : ""}`}
       pagination={false}
       rowClassName={(record) => {
