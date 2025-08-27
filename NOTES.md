@@ -122,6 +122,9 @@ I have successfully completed the Take Home Assignment for SupplySight's Daily I
 
 ### Getting Started:
 ```
+- locate the main directory
+cd frontend_panel
+
 - Install dependencies
 npm install
 
