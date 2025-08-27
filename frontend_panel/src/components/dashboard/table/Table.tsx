@@ -44,7 +44,6 @@ function TableComponent({
 
   useEffect(() => {
     if (selectedProduct && products) {
-      // Find the updated product
       const updatedProduct = products.find((p) => p.id === selectedProduct.id);
       if (updatedProduct) {
         setSelectedProduct(updatedProduct);
@@ -62,16 +61,6 @@ function TableComponent({
       </div>
     );
   }
-
-  // if (products.length === 0) {
-  //   return (
-  //     <div className="flex items-center justify-center h-64">
-  //       <div className="text-gray-600 dark:text-gray-400">
-  //         No products found
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   return (
     <>
@@ -93,12 +82,20 @@ function TableComponent({
 
           {/* Mobile View */}
           <div className="md:hidden">
-            <MobileTableView
-              data={paginatedData}
-              onRowClick={handleRowClick}
-              getStatus={getStatus}
-              theme={theme}
-            />
+            {products.length === 0 ? (
+              <div className="flex bg-gray-100 dark:bg-gray-800 rounded-md items-center justify-center h-40">
+                <div className="text-gray-600 dark:text-gray-400">
+                  No products found
+                </div>
+              </div>
+            ) : (
+              <MobileTableView
+                data={paginatedData}
+                onRowClick={handleRowClick}
+                getStatus={getStatus}
+                theme={theme}
+              />
+            )}
           </div>
 
           {/* Pagination */}

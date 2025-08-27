@@ -17,6 +17,11 @@ export const formatDate = (dateString: string): string => {
   return `${year}-${month}-${day}`;
 };
 
+// Format date for display (show day only for better readability)
+export const formatDayOnly = (date: string) => {
+  return new Date(date).getDate().toString();
+};
+
 // FORMAT NUMBER With no Decimal
 export const formatNumberNoDecimalShort = (value: number): string => {
   const suffixes = ["", "k", "M", "B", "T"];
@@ -82,7 +87,7 @@ export const generateRecentKpiData = (days: number = 30): KPI[] => {
     const baseStock = 10000 + Math.floor(Math.random() * 3000);
     const baseDemand = 8000 + Math.floor(Math.random() * 4000);
 
-    const trendFactor = (days - i) / days; 
+    const trendFactor = (days - i) / days;
     const stock = Math.floor(baseStock * (0.9 + trendFactor * 0.2));
     const demand = Math.floor(baseDemand * (0.9 + trendFactor * 0.2));
 

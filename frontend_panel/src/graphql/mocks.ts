@@ -15,11 +15,14 @@ export const mockResolvers = {
     },
   },
   Mutation: {
-    updateDemand: (_: unknown, args: { productId: string; newDemand: number }) => {
+    updateDemand: (
+      _: unknown,
+      args: { productId: string; newDemand: number }
+    ) => {
       const { productId, newDemand } = args;
-      
+
       console.log("Update demand args:", args);
-      
+
       const productIndex = mockProducts.findIndex((p) => p.id === productId);
       if (productIndex === -1) {
         throw new Error(`Product not found with ID: ${productId}`);
@@ -29,30 +32,43 @@ export const mockResolvers = {
       console.log("Updated product demand:", mockProducts[productIndex]);
       return mockProducts[productIndex];
     },
-    transferStock: (_: unknown, args: {
-      productId: string;
-      sourceWarehouse: string;
-      destinationWarehouse: string;
-      quantity: number;
-    }) => {
-      const { productId, sourceWarehouse, destinationWarehouse, quantity } = args;
-      
+    transferStock: (
+      _: unknown,
+      args: {
+        productId: string;
+        sourceWarehouse: string;
+        destinationWarehouse: string;
+        quantity: number;
+      }
+    ) => {
+      const { productId, sourceWarehouse, destinationWarehouse, quantity } =
+        args;
+
       console.log("Transfer stock args:", args);
-      
-      const productIndex = mockProducts.findIndex(
+
+      // Find source product
+      const sourceProductIndex = mockProducts.findIndex(
         (p) => p.id === productId && p.warehouse === sourceWarehouse
       );
 
-      if (productIndex === -1) {
-        throw new Error(`Product not found in source warehouse: ${sourceWarehouse}`);
+      if (sourceProductIndex === -1) {
+        throw new Error(
+          `Product not found in source warehouse: ${sourceWarehouse}`
+        );
       }
 
-      if (mockProducts[productIndex].stock < quantity) {
-        throw new Error(`Insufficient stock for transfer. Available: ${mockProducts[productIndex].stock}, Requested: ${quantity}`);
+      if (mockProducts[sourceProductIndex].stock < quantity) {
+        throw new Error(
+          `Insufficient stock for transfer. Available: ${mockProducts[sourceProductIndex].stock}, Requested: ${quantity}`
+        );
       }
 
-      // Update source warehouse stock
-      mockProducts[productIndex].stock -= quantity;
+      // Update source warehouse stock (deduct the transfer quantity)
+      mockProducts[sourceProductIndex].stock -= quantity;
+      console.log(
+        "Updated source product stock:",
+        mockProducts[sourceProductIndex]
+      );
 
       // Find or create product in destination warehouse
       const destProductIndex = mockProducts.findIndex(
@@ -60,21 +76,22 @@ export const mockResolvers = {
       );
 
       if (destProductIndex === -1) {
-        // Create new entry in destination warehouse
         const newProduct: Product = {
-          ...mockProducts[productIndex],
+          ...mockProducts[sourceProductIndex],
           warehouse: destinationWarehouse,
           stock: quantity,
         };
         mockProducts.push(newProduct);
         console.log("Created new product in destination:", newProduct);
-        return newProduct;
       } else {
-        // Update existing product in destination warehouse
         mockProducts[destProductIndex].stock += quantity;
-        console.log("Updated destination product:", mockProducts[destProductIndex]);
-        return mockProducts[destProductIndex];
+        console.log(
+          "Updated destination product stock:",
+          mockProducts[destProductIndex]
+        );
       }
+
+      return mockProducts[sourceProductIndex];
     },
   },
 };

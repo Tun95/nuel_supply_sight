@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { Product } from "../../../types/data/datatype";
 import { useTheme } from "../../../custom hooks/Hooks";
 import { getStatusInfo } from "../../../utilities/status/status";
-import { useState, useEffect } from "react"; 
+import { useState, useEffect } from "react";
 import { useMutation } from "@apollo/client";
 import {
   UPDATE_DEMAND,
@@ -20,7 +20,6 @@ interface ProductDetailSidebarProps {
   onProductUpdate?: (updatedProduct: Product) => void;
 }
 
-// Create a type for the products query result
 interface ProductsQueryResult {
   products: Product[];
 }
@@ -33,7 +32,7 @@ function ProductDetailSidebar({
   const { theme } = useTheme();
   const [newDemand, setNewDemand] = useState(product.demand.toString());
   const [transferQuantity, setTransferQuantity] = useState("");
-  const [sourceWarehouse, setSourceWarehouse] = useState(product.warehouse); // Set to current product warehouse
+  const [sourceWarehouse, setSourceWarehouse] = useState(product.warehouse);
   const [destinationWarehouse, setDestinationWarehouse] = useState("");
 
   const statusInfo = getStatusInfo(product.stock, product.demand);
@@ -88,36 +87,34 @@ function ProductDetailSidebar({
         // Find if the destination product already exists
         const destinationProductExists = existingProducts.products.some(
           (p) =>
-            p.id === updatedProduct.id &&
-            p.warehouse === updatedProduct.warehouse
+            p.id === updatedProduct.id && p.warehouse === destinationWarehouse
         );
 
         let updatedProducts;
 
         if (destinationProductExists) {
-          // Update both source and destination products
           updatedProducts = existingProducts.products.map((p) => {
-            if (p.id === updatedProduct.id && p.warehouse === sourceWarehouse) {
-              // This is the source product - reduce stock
+            if (p.id === product.id && p.warehouse === sourceWarehouse) {
               return { ...p, stock: p.stock - parseInt(transferQuantity) };
             } else if (
-              p.id === updatedProduct.id &&
+              p.id === product.id &&
               p.warehouse === destinationWarehouse
             ) {
-              // This is the destination product - increase stock
               return { ...p, stock: p.stock + parseInt(transferQuantity) };
             }
             return p;
           });
         } else {
-          // Destination product doesn't exist yet - add it and update source
           updatedProducts = [
             ...existingProducts.products.map((p) =>
-              p.id === updatedProduct.id && p.warehouse === sourceWarehouse
-                ? { ...p, stock: p.stock - parseInt(transferQuantity) }
+              p.id === product.id && p.warehouse === sourceWarehouse
+                ? { ...p, stock: p.stock - parseInt(transferQuantity) } // Deduct from source
                 : p
             ),
-            updatedProduct,
+            {
+              ...updatedProduct,
+              stock: parseInt(transferQuantity),
+            },
           ];
         }
 
@@ -336,7 +333,7 @@ function ProductDetailSidebar({
                     value={sourceWarehouse}
                     onChange={(e) => setSourceWarehouse(e.target.value)}
                     className="h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-                    disabled // Make source warehouse read-only
+                    disabled
                   >
                     <option value={product.warehouse}>
                       {warehouses.find((wh) => wh.code === product.warehouse)
@@ -350,7 +347,7 @@ function ProductDetailSidebar({
                   >
                     <option value="">Select destination warehouse</option>
                     {warehouses
-                      .filter((wh) => wh.code !== product.warehouse) // Exclude current warehouse
+                      .filter((wh) => wh.code !== product.warehouse)
                       .map((wh) => (
                         <option key={wh.code} value={wh.code}>
                           {wh.name}

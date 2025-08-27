@@ -12,6 +12,7 @@ import {
 import { KPI } from "../../../types/data/datatype";
 import { useTheme } from "../../../custom hooks/Hooks";
 import { CustomTooltipProps } from "../../../types/recharts/recharts";
+import { formatDayOnly } from "../../../utilities/utils/Utils";
 
 interface ChartComponentProps {
   data: KPI[];
@@ -19,11 +20,6 @@ interface ChartComponentProps {
 
 function ChartComponent({ data }: ChartComponentProps) {
   const { theme } = useTheme();
-
-  // Format date for display (show day only for better readability)
-  const formatDate = (date: string) => {
-    return new Date(date).getDate().toString();
-  };
 
   // Custom tooltip with proper typing
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
@@ -53,9 +49,6 @@ function ChartComponent({ data }: ChartComponentProps) {
     return value.toString();
   };
 
-  // Add debug logging to check the data
-  console.log("Chart data:", data);
-
   return (
     <div className="w-full h-full p-4 relative right-2">
       <ResponsiveContainer
@@ -78,7 +71,7 @@ function ChartComponent({ data }: ChartComponentProps) {
           />
           <XAxis
             dataKey="date"
-            tickFormatter={formatDate}
+            tickFormatter={formatDayOnly}
             stroke={theme === "dark" ? "#9ca3af" : "#6b7280"}
             fontSize={12}
           />

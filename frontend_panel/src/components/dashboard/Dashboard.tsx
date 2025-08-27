@@ -39,7 +39,7 @@ function Dashboard() {
     error: kpisError,
     refetch: refetchKPIs,
   } = useQuery<KPIsQueryData>(GET_KPIS, {
-    skip: true, // don't run on mount
+    skip: true,
     fetchPolicy: "network-only",
   });
 
@@ -151,13 +151,10 @@ function Dashboard() {
 
   // HANDLE PRODUCT UPDATE
   const handleProductUpdate = (updatedProduct: Product) => {
-    // Update the products state to reflect the changes
     setProducts((prevProducts) =>
       prevProducts.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
     );
 
-    // If you're using Apollo cache, you might also want to update it
-    // This ensures the UI stays consistent
     client.cache.updateQuery({ query: GET_PRODUCTS }, (data) => {
       if (data) {
         return {
