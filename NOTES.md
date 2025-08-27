@@ -121,6 +121,7 @@ I have successfully completed the Take Home Assignment for SupplySight's Daily I
 - Environment-specific configurations
 
 ### Getting Started:
+```
 - Install dependencies
 npm install
 
@@ -129,3 +130,4 @@ npm run dev
 
 - Build for production
 npm run build
+```
