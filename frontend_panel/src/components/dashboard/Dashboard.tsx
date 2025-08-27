@@ -197,7 +197,7 @@ function Dashboard() {
       >
         {/* Welcome message */}
         <div className="mb-2 max-480px:mb-1">
-          <div className="content max-900px:px-2 max-480px:p-2 max-480px:pb-0">
+          <div className="content max-900px:px-2  max-900px:mt-3 max-480px:p-2 max-480px:pb-0">
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 max-480px:text-xl ">
               Welcome back Tunji!
             </h2>

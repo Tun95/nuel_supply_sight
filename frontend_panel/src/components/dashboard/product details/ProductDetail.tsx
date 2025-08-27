@@ -13,6 +13,7 @@ import {
 import { useQuery } from "@apollo/client";
 import { GET_WAREHOUSES } from "../../../graphql/queries";
 import { WarehousesQueryData } from "../../../types/graphql/graphql";
+import { toast } from "sonner";
 
 interface ProductDetailSidebarProps {
   product: Product;
@@ -138,7 +139,7 @@ function ProductDetailSidebar({
   const handleUpdateDemand = async () => {
     const demandValue = parseInt(newDemand);
     if (demandValue < 1) {
-      alert("Demand cannot be less than 1");
+      toast.error("Demand cannot be less than 1");
       return;
     }
 
@@ -149,33 +150,33 @@ function ProductDetailSidebar({
           newDemand: demandValue,
         },
       });
-      alert("Demand updated successfully!");
+      toast.success("Demand updated successfully!");
     } catch (error) {
       console.error("Error updating demand:", error);
-      alert("Failed to update demand");
+      toast.error("Failed to update demand");
     }
   };
 
   const handleTransferStock = async () => {
     if (!sourceWarehouse || !destinationWarehouse || !transferQuantity) {
-      alert("Please fill all transfer fields");
+      toast.error("Please fill all transfer fields");
       return;
     }
 
     if (sourceWarehouse === destinationWarehouse) {
-      alert("Source and destination warehouses cannot be the same");
+      toast.warning("Source and destination warehouses cannot be the same");
       return;
     }
 
     const quantityValue = parseInt(transferQuantity);
 
     if (quantityValue < 1) {
-      alert("Transfer quantity cannot be less than 1");
+      toast.warning("Transfer quantity cannot be less than 1");
       return;
     }
 
     if (quantityValue > product.stock) {
-      alert(
+      toast.error(
         `Transfer quantity cannot exceed available stock of ${product.stock}`
       );
       return;
@@ -190,12 +191,12 @@ function ProductDetailSidebar({
           quantity: quantityValue,
         },
       });
-      alert("Stock transferred successfully!");
+      toast.success("Stock transferred successfully!");
       setTransferQuantity("");
       setDestinationWarehouse("");
     } catch (error) {
       console.error("Error transferring stock:", error);
-      alert("Failed to transfer stock");
+      toast.error("Failed to transfer stock");
     }
   };
 
