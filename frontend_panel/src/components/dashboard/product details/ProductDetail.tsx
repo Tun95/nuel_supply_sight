@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { Product } from "../../../types/data/datatype";
 import { useTheme } from "../../../custom hooks/Hooks";
 import { getStatusInfo } from "../../../utilities/status/status";
-import { useState } from "react";
+import { useState, useEffect } from "react"; 
 import { useMutation } from "@apollo/client";
 import {
   UPDATE_DEMAND,
@@ -33,10 +33,18 @@ function ProductDetailSidebar({
   const { theme } = useTheme();
   const [newDemand, setNewDemand] = useState(product.demand.toString());
   const [transferQuantity, setTransferQuantity] = useState("");
-  const [sourceWarehouse, setSourceWarehouse] = useState("");
+  const [sourceWarehouse, setSourceWarehouse] = useState(product.warehouse); // Set to current product warehouse
   const [destinationWarehouse, setDestinationWarehouse] = useState("");
 
   const statusInfo = getStatusInfo(product.stock, product.demand);
+
+  // Reset form fields when product changes
+  useEffect(() => {
+    setNewDemand(product.demand.toString());
+    setSourceWarehouse(product.warehouse);
+    setTransferQuantity("");
+    setDestinationWarehouse("");
+  }, [product]);
 
   // GraphQL Mutations with cache updates
   const [updateDemand] = useMutation(UPDATE_DEMAND, {
@@ -131,11 +139,17 @@ function ProductDetailSidebar({
   const warehouses = warehousesData?.warehouses || [];
 
   const handleUpdateDemand = async () => {
+    const demandValue = parseInt(newDemand);
+    if (demandValue < 1) {
+      alert("Demand cannot be less than 1");
+      return;
+    }
+
     try {
       await updateDemand({
         variables: {
           productId: product.id,
-          newDemand: parseInt(newDemand),
+          newDemand: demandValue,
         },
       });
       alert("Demand updated successfully!");
@@ -156,22 +170,51 @@ function ProductDetailSidebar({
       return;
     }
 
+    const quantityValue = parseInt(transferQuantity);
+
+    if (quantityValue < 1) {
+      alert("Transfer quantity cannot be less than 1");
+      return;
+    }
+
+    if (quantityValue > product.stock) {
+      alert(
+        `Transfer quantity cannot exceed available stock of ${product.stock}`
+      );
+      return;
+    }
+
     try {
       await transferStock({
         variables: {
           productId: product.id,
           sourceWarehouse,
           destinationWarehouse,
-          quantity: parseInt(transferQuantity),
+          quantity: quantityValue,
         },
       });
       alert("Stock transferred successfully!");
       setTransferQuantity("");
-      setSourceWarehouse("");
       setDestinationWarehouse("");
     } catch (error) {
       console.error("Error transferring stock:", error);
       alert("Failed to transfer stock");
+    }
+  };
+
+  const handleDemandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || parseInt(value) >= 1) {
+      setNewDemand(value);
+    }
+  };
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || parseInt(value) >= 1) {
+      if (value === "" || parseInt(value) <= product.stock) {
+        setTransferQuantity(value);
+      }
     }
   };
 
@@ -268,8 +311,9 @@ function ProductDetailSidebar({
               <div className="flex space-x-2">
                 <input
                   type="number"
+                  min="1"
                   value={newDemand}
-                  onChange={(e) => setNewDemand(e.target.value)}
+                  onChange={handleDemandChange}
                   className="flex-1 h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                 />
                 <button
@@ -292,13 +336,12 @@ function ProductDetailSidebar({
                     value={sourceWarehouse}
                     onChange={(e) => setSourceWarehouse(e.target.value)}
                     className="h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                    disabled // Make source warehouse read-only
                   >
-                    <option value="">Select source warehouse</option>
-                    {warehouses.map((wh) => (
-                      <option key={wh.code} value={wh.code}>
-                        {wh.name}
-                      </option>
-                    ))}
+                    <option value={product.warehouse}>
+                      {warehouses.find((wh) => wh.code === product.warehouse)
+                        ?.name || product.warehouse}
+                    </option>
                   </select>
                   <select
                     value={destinationWarehouse}
@@ -306,19 +349,23 @@ function ProductDetailSidebar({
                     className="h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                   >
                     <option value="">Select destination warehouse</option>
-                    {warehouses.map((wh) => (
-                      <option key={wh.code} value={wh.code}>
-                        {wh.name}
-                      </option>
-                    ))}
+                    {warehouses
+                      .filter((wh) => wh.code !== product.warehouse) // Exclude current warehouse
+                      .map((wh) => (
+                        <option key={wh.code} value={wh.code}>
+                          {wh.name}
+                        </option>
+                      ))}
                   </select>
                 </div>
                 <div className="flex space-x-2">
                   <input
                     type="number"
+                    min="1"
+                    max={product.stock}
                     placeholder="Quantity"
                     value={transferQuantity}
-                    onChange={(e) => setTransferQuantity(e.target.value)}
+                    onChange={handleQuantityChange}
                     className="flex-1 h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                   />
                   <button
@@ -328,6 +375,9 @@ function ProductDetailSidebar({
                     Transfer
                   </button>
                 </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Maximum transfer: {product.stock} units
+                </p>
               </div>
             </div>
           </div>
