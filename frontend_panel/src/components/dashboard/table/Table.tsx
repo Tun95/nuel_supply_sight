@@ -5,17 +5,20 @@ import ProductDetailSidebar from "../product details/ProductDetail";
 import { useTheme } from "../../../custom hooks/Hooks";
 import { Product } from "../../../types/data/datatype";
 import { DesktopTableView, MobileTableView } from "./tableviews/TableViews";
+import { Loader } from "lucide-react";
 
 interface TableComponentProps {
   products: Product[];
   currentPage: number;
   onPageChange: (page: number) => void;
+  loading?: boolean;
 }
 
 function TableComponent({
   products,
   currentPage,
   onPageChange,
+  loading = false,
 }: TableComponentProps) {
   const { theme } = useTheme();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -36,6 +39,27 @@ function TableComponent({
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-600 dark:text-gray-400 flex justify-center items-center">
+          <Loader className="animate-spin text-gray-500 dark:text-gray-400" />{" "}
+          Loading products...
+        </div>
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-600 dark:text-gray-400">
+          No products found
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

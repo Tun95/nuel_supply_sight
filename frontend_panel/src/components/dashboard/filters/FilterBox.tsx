@@ -1,18 +1,20 @@
 // FilterBox.tsx
 import { useState } from "react";
 import { useTheme } from "../../../custom hooks/Hooks";
-import { mockWarehouses } from "../../../data/data";
+import { Warehouse } from "../../../types/data/datatype";
 
 interface FilterBoxProps {
   onSearchChange: (value: string) => void;
   onWarehouseChange: (value: string) => void;
   onStatusChange: (value: string) => void;
+  warehouses: Warehouse[];
 }
 
 function FilterBox({
   onSearchChange,
   onWarehouseChange,
   onStatusChange,
+  warehouses,
 }: FilterBoxProps) {
   const { theme } = useTheme();
   const [searchValue, setSearchValue] = useState("");
@@ -69,7 +71,7 @@ function FilterBox({
             className="w-full h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white"
           >
             <option value="all">All Warehouses</option>
-            {mockWarehouses.map((warehouse) => (
+            {warehouses.map((warehouse) => (
               <option key={warehouse.code} value={warehouse.code}>
                 {warehouse.name} ({warehouse.code})
               </option>

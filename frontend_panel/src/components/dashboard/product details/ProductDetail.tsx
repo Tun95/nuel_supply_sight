@@ -1,6 +1,14 @@
+// ProductDetailSidebar.tsx
 import { X } from "lucide-react";
 import { Product } from "../../../types/data/datatype";
 import { useTheme } from "../../../custom hooks/Hooks";
+import { getStatusInfo } from "../../../utilities/status/status";
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import { UPDATE_DEMAND, TRANSFER_STOCK, GET_PRODUCTS } from "../../../graphql/queries";
+import { useQuery } from "@apollo/client";
+import { GET_WAREHOUSES } from "../../../graphql/queries";
+import { WarehousesQueryData } from "../../../types/graphql/graphql";
 
 interface ProductDetailSidebarProps {
   product: Product;
@@ -9,45 +17,74 @@ interface ProductDetailSidebarProps {
 
 function ProductDetailSidebar({ product, onClose }: ProductDetailSidebarProps) {
   const { theme } = useTheme();
-
-  const getStatusInfo = (stock: number, demand: number) => {
-    if (stock > demand)
-      return {
-        status: "Healthy",
-        color: "green",
-        bgColor: "bg-green-100",
-        textColor: "text-green-800",
-        darkBgColor: "bg-green-900",
-        darkTextColor: "text-green-300",
-      };
-    if (stock === demand)
-      return {
-        status: "Low",
-        color: "orange",
-        bgColor: "bg-orange-100",
-        textColor: "text-orange-800",
-        darkBgColor: "bg-orange-900",
-        darkTextColor: "text-orange-300",
-      };
-    return {
-      status: "Critical",
-      color: "red",
-      bgColor: "bg-red-100",
-      textColor: "text-red-800",
-      darkBgColor: "bg-red-900",
-      darkTextColor: "text-red-300",
-    };
-  };
+  const [newDemand, setNewDemand] = useState(product.demand.toString());
+  const [transferQuantity, setTransferQuantity] = useState("");
+  const [sourceWarehouse, setSourceWarehouse] = useState("");
+  const [destinationWarehouse, setDestinationWarehouse] = useState("");
 
   const statusInfo = getStatusInfo(product.stock, product.demand);
 
+  // GraphQL Mutations
+  const [updateDemand] = useMutation(UPDATE_DEMAND);
+  const [transferStock] = useMutation(TRANSFER_STOCK);
+
+  // Get warehouses for dropdowns
+  const { data: warehousesData } =
+    useQuery<WarehousesQueryData>(GET_WAREHOUSES);
+  const warehouses = warehousesData?.warehouses || [];
+
+  const handleUpdateDemand = async () => {
+    try {
+      await updateDemand({
+        variables: {
+          productId: product.id,
+          newDemand: parseInt(newDemand),
+        },
+        refetchQueries: [{ query: GET_PRODUCTS }],
+      });
+      // Show success message (you could add a toast notification here)
+      alert("Demand updated successfully!");
+    } catch (error) {
+      console.error("Error updating demand:", error);
+      alert("Failed to update demand");
+    }
+  };
+
+  const handleTransferStock = async () => {
+    if (!sourceWarehouse || !destinationWarehouse || !transferQuantity) {
+      alert("Please fill all transfer fields");
+      return;
+    }
+
+    try {
+      await transferStock({
+        variables: {
+          productId: product.id,
+          sourceWarehouse,
+          destinationWarehouse,
+          quantity: parseInt(transferQuantity),
+        },
+        refetchQueries: [{ query: GET_PRODUCTS }],
+      });
+      // Show success message
+      alert("Stock transferred successfully!");
+      // Reset form
+      setTransferQuantity("");
+      setSourceWarehouse("");
+      setDestinationWarehouse("");
+    } catch (error) {
+      console.error("Error transferring stock:", error);
+      alert("Failed to transfer stock");
+    }
+  };
+
   return (
     <div
-      className={`max-900px:h-[100vh] w-96 h-full shadow-xl w-full max-w-[480px] transition-transform duration-200 ease-in-out ${
+      className={`max-900px:h-[100vh] w-96 h-full shadow-xl max-w-[480px] transition-transform duration-200 ease-in-out ${
         theme === "dark" ? "bg-gray-900" : "bg-white"
       } max-480px:w-full`}
     >
-      <div className=" h-full flex flex-col">
+      <div className="h-full flex flex-col">
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 border-b border-l h-16 border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center px-6 py-4">
@@ -134,10 +171,14 @@ function ProductDetailSidebar({ product, onClose }: ProductDetailSidebarProps) {
               <div className="flex space-x-2">
                 <input
                   type="number"
-                  defaultValue={product.demand}
+                  value={newDemand}
+                  onChange={(e) => setNewDemand(e.target.value)}
                   className="flex-1 h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                 />
-                <button className="h-9 outline-none text-sm px-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                <button
+                  onClick={handleUpdateDemand}
+                  className="h-9 outline-none text-sm px-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                >
                   Update
                 </button>
               </div>
@@ -150,20 +191,43 @@ function ProductDetailSidebar({ product, onClose }: ProductDetailSidebarProps) {
               </h4>
               <div className="space-y-2">
                 <div className="grid grid-cols-2 gap-2">
-                  <select className="h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
-                    <option>Select source warehouse</option>
+                  <select
+                    value={sourceWarehouse}
+                    onChange={(e) => setSourceWarehouse(e.target.value)}
+                    className="h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                  >
+                    <option value="">Select source warehouse</option>
+                    {warehouses.map((wh) => (
+                      <option key={wh.code} value={wh.code}>
+                        {wh.name}
+                      </option>
+                    ))}
                   </select>
-                  <select className="h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
-                    <option>Select destination warehouse</option>
+                  <select
+                    value={destinationWarehouse}
+                    onChange={(e) => setDestinationWarehouse(e.target.value)}
+                    className="h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                  >
+                    <option value="">Select destination warehouse</option>
+                    {warehouses.map((wh) => (
+                      <option key={wh.code} value={wh.code}>
+                        {wh.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="flex space-x-2">
                   <input
                     type="number"
                     placeholder="Quantity"
+                    value={transferQuantity}
+                    onChange={(e) => setTransferQuantity(e.target.value)}
                     className="flex-1 h-9 outline-none text-sm px-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                   />
-                  <button className="h-9 outline-none text-sm px-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                  <button
+                    onClick={handleTransferStock}
+                    className="h-9 outline-none text-sm px-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                  >
                     Transfer
                   </button>
                 </div>

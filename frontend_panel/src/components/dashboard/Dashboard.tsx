@@ -4,7 +4,6 @@ import Widget from "./widget/Widget";
 import { useDateRange, useTheme } from "../../custom hooks/Hooks";
 import ChartComponent from "./chart/Chart";
 import { useState, useEffect, useMemo } from "react";
-import { mockKpiData, mockProducts } from "../../data/data";
 import {
   calculateFillRate,
   calculateTotalDemand,
@@ -13,22 +12,74 @@ import {
 import { KPI, Product } from "../../types/data/datatype";
 import FilterBox from "./filters/FilterBox";
 import { Loader } from "lucide-react";
+import { useQuery } from "@apollo/client";
+import { GET_PRODUCTS, GET_KPIS, GET_WAREHOUSES } from "../../graphql/queries";
+import {
+  KPIsQueryData,
+  ProductsQueryData,
+  WarehousesQueryData,
+} from "../../types/graphql/graphql";
 
 function Dashboard() {
   const { theme } = useTheme();
   const { selectedDateRange } = useDateRange();
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+
+  // GraphQL Queries
+  const {
+    data: productsData,
+    loading: productsLoading,
+    error: productsError,
+  } = useQuery<ProductsQueryData>(GET_PRODUCTS);
+  const {
+    data: kpisData,
+    loading: kpisLoading,
+    error: kpisError,
+  } = useQuery<KPIsQueryData>(GET_KPIS, {
+    variables: { range: selectedDateRange },
+  });
+  const { data: warehousesData } =
+    useQuery<WarehousesQueryData>(GET_WAREHOUSES);
+
+  const [products, setProducts] = useState<Product[]>([]);
   const [kpiData, setKpiData] = useState({
     totalStock: 0,
     totalDemand: 0,
     fillRate: 0,
   });
   const [kpiChartData, setKpiChartData] = useState<KPI[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchFilter, setSearchFilter] = useState("");
   const [warehouseFilter, setWarehouseFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Update products when data is fetched
+  useEffect(() => {
+    if (productsData) {
+      setProducts(productsData.products);
+    }
+  }, [productsData]);
+
+  // Update KPI chart data when data is fetched
+  useEffect(() => {
+    if (kpisData) {
+      setKpiChartData(kpisData.kpis);
+    }
+  }, [kpisData]);
+
+  // Calculate KPIs when products change
+  useEffect(() => {
+    if (products.length > 0) {
+      const totalStock = calculateTotalStock(products);
+      const totalDemand = calculateTotalDemand(products);
+      const fillRate = calculateFillRate(products);
+
+      setKpiData({
+        totalStock,
+        totalDemand,
+        fillRate,
+      });
+    }
+  }, [products]);
 
   // Filter products based on filters
   const filteredProducts = useMemo(() => {
@@ -65,72 +116,17 @@ function Dashboard() {
     setCurrentPage(1);
   }, [searchFilter, warehouseFilter, statusFilter]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+  // Combined loading state
+  const loading = productsLoading || kpisLoading;
 
-        // Fetch product data
-        setProducts(mockProducts);
+  // Handle errors
+  if (productsError) {
+    console.error("Error fetching products:", productsError);
+  }
 
-        // Calculate KPIs from product data
-        const totalStock = calculateTotalStock(mockProducts);
-        const totalDemand = calculateTotalDemand(mockProducts);
-        const fillRate = calculateFillRate(mockProducts);
-
-        setKpiData({
-          totalStock,
-          totalDemand,
-          fillRate,
-        });
-
-        // Simulate fetching KPI data based on date range
-        const filteredData = filterKpiDataByRange(
-          mockKpiData,
-          selectedDateRange
-        );
-
-        setKpiChartData(filteredData);
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [selectedDateRange]);
-
-  // Function to filter KPI data based on date range
-  const filterKpiDataByRange = (data: KPI[], range: string): KPI[] => {
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-
-    const startDate = new Date();
-
-    switch (range) {
-      case "7d":
-        startDate.setDate(today.getDate() - 7);
-        break;
-      case "14d":
-        startDate.setDate(today.getDate() - 14);
-        break;
-      case "30d":
-        startDate.setDate(today.getDate() - 30);
-        break;
-      default:
-        startDate.setDate(today.getDate() - 7);
-    }
-
-    startDate.setHours(0, 0, 0, 0);
-
-    return data.filter((kpi) => {
-      const kpiDate = new Date(kpi.date);
-      kpiDate.setHours(12, 0, 0, 0);
-      return kpiDate >= startDate && kpiDate <= today;
-    });
-  };
+  if (kpisError) {
+    console.error("Error fetching KPIs:", kpisError);
+  }
 
   if (loading) {
     return (
@@ -142,6 +138,7 @@ function Dashboard() {
       </div>
     );
   }
+
   return (
     <div className={`w-full overflow-hidden ${theme === "dark" ? "dark" : ""}`}>
       <div
@@ -160,6 +157,7 @@ function Dashboard() {
           </div>
         </div>
       </div>
+
       {/* KPI Widgets */}
       <div
         className="grid grid-cols-3 gap-5 py-5 w-full 
@@ -202,6 +200,7 @@ function Dashboard() {
             onSearchChange={setSearchFilter}
             onWarehouseChange={setWarehouseFilter}
             onStatusChange={setStatusFilter}
+            warehouses={warehousesData?.warehouses || []}
           />
           <TableComponent
             products={filteredProducts}

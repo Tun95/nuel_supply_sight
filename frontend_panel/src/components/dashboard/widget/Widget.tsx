@@ -1,4 +1,3 @@
-// Widget.tsx
 import { Info } from "lucide-react";
 import { formatNumberWithCommas } from "../../../utilities/utils/Utils";
 import { WidgetProps } from "../../../types/widget/widget";

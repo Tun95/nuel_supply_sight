@@ -24,6 +24,7 @@ export default defineConfig({
           vendor: ["react", "react-dom"],
         },
       },
+      external: ["tslib"],
     },
   },
   define: {

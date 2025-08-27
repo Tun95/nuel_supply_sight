@@ -1,3 +1,4 @@
+// ChartComponent.tsx
 import {
   LineChart,
   Line,
@@ -51,6 +52,9 @@ function ChartComponent({ data }: ChartComponentProps) {
     }
     return value.toString();
   };
+
+  // Add debug logging to check the data
+  console.log("Chart data:", data);
 
   return (
     <div className="w-full h-full p-4 relative right-2">
