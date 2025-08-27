@@ -134,3 +134,10 @@ npm run dev
 - Build for production
 npm run build
 ```
+
+### Repo & Link
+```
+- Github: https://github.com/Tun95/nuel_supply_sight
+
+- Demo Link: 
+```

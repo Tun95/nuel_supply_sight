@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  base: "/", // Ensure correct base path for Netlify
+  base: "/",
   css: {
     preprocessorOptions: {
       scss: {
@@ -16,7 +16,7 @@ export default defineConfig({
     assetsDir: "assets",
     rollupOptions: {
       output: {
-        format: "es", // Ensure ES module format
+        format: "es",
         entryFileNames: "assets/[name]-[hash].js",
         chunkFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name]-[hash].[ext]",
@@ -24,7 +24,6 @@ export default defineConfig({
           vendor: ["react", "react-dom"],
         },
       },
-      external: ["tslib"],
     },
   },
   define: {
@@ -35,8 +34,14 @@ export default defineConfig({
     open: true,
   },
   optimizeDeps: {
+    include: ["tslib"],
     esbuildOptions: {
       target: "esnext",
+    },
+  },
+  resolve: {
+    alias: {
+      tslib: "tslib/tslib.es6.js",
     },
   },
 });
