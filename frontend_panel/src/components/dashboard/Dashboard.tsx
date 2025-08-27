@@ -10,7 +10,7 @@ import {
   calculateTotalStock,
   generateRecentKpiData,
 } from "../../utilities/utils/Utils";
-import { KPI, Product } from "../../types/data/datatype";
+import { Product } from "../../types/data/datatype";
 import FilterBox from "./filters/FilterBox";
 import { Loader } from "lucide-react";
 import { useQuery } from "@apollo/client";
@@ -31,12 +31,17 @@ function Dashboard() {
     loading: productsLoading,
     error: productsError,
   } = useQuery<ProductsQueryData>(GET_PRODUCTS);
+
   const {
     data: kpisData,
+    loading: kpisLoading,
     error: kpisError,
+    refetch: refetchKPIs,
   } = useQuery<KPIsQueryData>(GET_KPIS, {
-    variables: { range: selectedDateRange },
+    skip: true, // don't run on mount
+    fetchPolicy: "network-only",
   });
+
   const { data: warehousesData } =
     useQuery<WarehousesQueryData>(GET_WAREHOUSES);
 
@@ -46,11 +51,18 @@ function Dashboard() {
     totalDemand: 0,
     fillRate: 0,
   });
-  const [kpiChartData, setKpiChartData] = useState<KPI[]>([]);
   const [searchFilter, setSearchFilter] = useState("");
   const [warehouseFilter, setWarehouseFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Refetch KPIs when date range changes
+  useEffect(() => {
+    if (selectedDateRange) {
+      console.log("Refetching KPIs with range:", selectedDateRange);
+      refetchKPIs({ range: selectedDateRange });
+    }
+  }, [selectedDateRange, refetchKPIs]);
 
   // Update products when data is fetched
   useEffect(() => {
@@ -73,6 +85,33 @@ function Dashboard() {
       });
     }
   }, [products]);
+
+  // Use memoized chart data to prevent unnecessary re-renders
+  const chartData = useMemo(() => {
+    if (kpisData && kpisData.kpis) {
+      console.log("Using server data:", kpisData.kpis.length, "days");
+      return kpisData.kpis;
+    }
+
+    if (kpisError) {
+      console.log("Using fallback data for:", selectedDateRange);
+      let days = 7;
+      if (selectedDateRange === "14d") days = 14;
+      if (selectedDateRange === "30d") days = 30;
+      return generateRecentKpiData(days);
+    }
+
+    // Generate data based on selected date range while loading
+    if (selectedDateRange) {
+      let days = 7;
+      if (selectedDateRange === "14d") days = 14;
+      if (selectedDateRange === "30d") days = 30;
+      return generateRecentKpiData(days);
+    }
+
+    // Return empty array if no range is selected
+    return [];
+  }, [kpisData, kpisError, selectedDateRange]);
 
   // Filter products based on filters
   const filteredProducts = useMemo(() => {
@@ -109,30 +148,8 @@ function Dashboard() {
     setCurrentPage(1);
   }, [searchFilter, warehouseFilter, statusFilter]);
 
-  // In Dashboard.tsx
-  useEffect(() => {
-    if (kpisData) {
-      // If we got data from the server, use it
-      setKpiChartData(kpisData.kpis);
-    } else {
-      // Fallback: generate data client-side based on selectedDateRange
-      let days = 7;
-      if (selectedDateRange === "14d") days = 14;
-      if (selectedDateRange === "30d") days = 30;
-
-      const generatedData = generateRecentKpiData(days);
-      setKpiChartData(generatedData);
-      console.log("KPIDATA AFTER:", kpiChartData)
-    }
-  }, [kpisData, selectedDateRange]);
-
-  // Also log when the date range changes
-  useEffect(() => {
-    console.log("Date range changed to:", selectedDateRange);
-  }, [selectedDateRange]);
-
   // Combined loading state
-  const loading = productsLoading;
+  const loading = productsLoading || kpisLoading;
 
   // Handle errors
   if (productsError) {
@@ -192,8 +209,8 @@ function Dashboard() {
         </h4>
         <div className="lg:grid-cols-2 gap-5 mt-1 w-full max-900px:grid-cols-1">
           <div className="w-full border border-gray-200 dark:border-gray-700 p-2 rounded-md h-[360px] overflow-hidden bg-white dark:bg-gray-800">
-            {kpiChartData.length > 0 ? (
-              <ChartComponent data={kpiChartData} />
+            {chartData.length > 0 ? (
+              <ChartComponent data={chartData} />
             ) : (
               <div className="flex items-center justify-center h-full">
                 <p className="text-gray-500 dark:text-gray-400">

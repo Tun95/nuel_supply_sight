@@ -7,10 +7,9 @@ export const mocks = {
   Query: {
     products: () => mockProducts,
     warehouses: () => mockWarehouses,
-    // Alternative fix for the kpis resolver
-    kpis: (_: unknown, args: { range: string }) => {
+    kpis: (_: unknown, args: { range?: string }) => {
       const range = args?.range || "7d";
-      console.log("Received range:", args?.range);
+      console.log("Received range:", range);
       const days = parseInt(range.replace("d", ""), 10);
       return generateRecentKpiData(days);
     },

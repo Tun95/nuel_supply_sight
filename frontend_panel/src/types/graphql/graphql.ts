@@ -47,3 +47,5 @@ export interface TransferStockVariables {
   destinationWarehouse: string;
   quantity: number;
 }
+
+
