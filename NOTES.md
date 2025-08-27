@@ -121,20 +121,15 @@ Trade-off: More complex CSS but better mobile experience
 
 Benefit: Single codebase for all device sizes
 
-⏰ With More Time, I Would Improve
-Performance Optimizations
-Implement React.memo and useCallback for expensive components
+# ⏰ With More Time, I Would Improve
+## Performance Optimizations
+- Implement React.memo and useCallback for expensive components
+- Add virtualization for large product lists
+- Implement GraphQL query batching
 
-Add virtualization for large product lists
-
-Implement GraphQL query batching
-
-Testing
-Add comprehensive test suite (Jest + React Testing Library)
-
-End-to-end testing with Cypress
-
-GraphQL mock testing
+# Testing
+- Add comprehensive test suite (Jest + React Testing Library)
+- GraphQL mock testing
 
 # User Experience
 - Loading skeletons for better perceived performance
@@ -156,11 +151,11 @@ GraphQL mock testing
 - Environment-specific configurations
 
 # Getting Started:
-# Install dependencies
+- Install dependencies
 npm install
 
-# Start development server
+- Start development server
 npm run dev
 
-# Build for production
+- Build for production
 npm run build
