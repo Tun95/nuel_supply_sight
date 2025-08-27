@@ -139,5 +139,5 @@ npm run build
 ```
 - Github: https://github.com/Tun95/nuel_supply_sight
 
-- Demo Link: 
+- Demo Link: https://nuel-supply-sight.vercel.app/
 ```
